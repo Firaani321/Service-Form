@@ -5,6 +5,8 @@ import './App.css';
 function LoginPage({ onLoginSuccess }) {
   // Ambil sandi rahasia dari environment variables
   const SHARED_PASSWORD = process.env.REACT_APP_SHARED_PASSWORD;
+  console.log('Password yang diterima dari environment:', SHARED_PASSWORD);
+
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
