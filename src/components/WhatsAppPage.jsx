@@ -13,15 +13,18 @@ function WhatsAppPage() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Memberi peringatan jika URL server belum diatur
     if (!SERVER_URL) {
       setStatusMessage('Kesalahan: URL Server belum diatur di environment variables.');
-      console.error('REACT_APP_SERVER_URL tidak ditemukan di .env');
       return;
     }
 
-    // Hubungkan ke server Replit Anda
-    const socket = io(SERVER_URL);
+    // --- INI BAGIAN YANG DIPERBAIKI ---
+    // Tambahkan header khusus untuk melewati peringatan ngrok
+    const socket = io(SERVER_URL, {
+      extraHeaders: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
 
     socket.on('connect', () => {
       console.log('Terhubung ke server Socket.IO!');
