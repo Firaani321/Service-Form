@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "lucide-react": "0.536.0",
+    "@tailwindcss/postcss": "^4.1.11",
     "@supabase/supabase-js": "^2.53.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
