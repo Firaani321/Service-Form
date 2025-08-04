@@ -8,23 +8,21 @@ import ServiceTable from './components/ServiceTable';
 // Impor ikon
 import { Plus, LogOut } from 'lucide-react';
 
-// Komponen Modal untuk Form, sekarang berada di dalam App.js
-function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData = {} }) {
-  const [formData, setFormData] = useState({
-    customer_name: '',
-    customer_phone: '',
-    item_name: '',
-    item_damage: '',
-  });
+// Komponen Modal untuk Form
+function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) { // Hapus default value
+  const [formData, setFormData] = useState({});
 
   // useEffect untuk mengisi data saat mode edit
   useEffect(() => {
-    if (initialData.id) {
+    // --- INI BAGIAN YANG DIPERBAIKI ---
+    // Tambahkan pengecekan `initialData` sebelum mengakses .id
+    if (initialData && initialData.id) {
       setFormData(initialData);
     } else {
+      // Set ke state kosong untuk mode "Tambah Baru"
       setFormData({ customer_name: '', customer_phone: '', item_name: '', item_damage: '' });
     }
-  }, [initialData]);
+  }, [initialData, isOpen]); // Tambahkan isOpen sebagai dependency
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,10 +41,10 @@ function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData = {}
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
         <h2 className="text-xl font-bold mb-4">{formData.id ? 'Edit Servis' : 'Tambah Servis Baru'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <input name="customer_name" value={formData.customer_name} onChange={handleChange} placeholder="Nama Pelanggan" className="p-2 border rounded" required />
-          <input name="customer_phone" value={formData.customer_phone} onChange={handleChange} placeholder="No. Telepon" className="p-2 border rounded" />
-          <input name="item_name" value={formData.item_name} onChange={handleChange} placeholder="Nama Barang" className="p-2 border rounded md:col-span-2" required />
-          <textarea name="item_damage" value={formData.item_damage} onChange={handleChange} placeholder="Deskripsi Kerusakan" className="p-2 border rounded md:col-span-2" rows="3"></textarea>
+          <input name="customer_name" value={formData.customer_name || ''} onChange={handleChange} placeholder="Nama Pelanggan" className="p-2 border rounded" required />
+          <input name="customer_phone" value={formData.customer_phone || ''} onChange={handleChange} placeholder="No. Telepon" className="p-2 border rounded" />
+          <input name="item_name" value={formData.item_name || ''} onChange={handleChange} placeholder="Nama Barang" className="p-2 border rounded md:col-span-2" required />
+          <textarea name="item_damage" value={formData.item_damage || ''} onChange={handleChange} placeholder="Deskripsi Kerusakan" className="p-2 border rounded md:col-span-2" rows="3"></textarea>
         </div>
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Batal</button>
@@ -65,7 +63,7 @@ function App() {
   
   // State untuk mengontrol modal form
   const [isFormOpen, setFormOpen] = useState(false);
-  const [editingService, setEditingService] = useState(null);
+  const [editingService, setEditingService] = useState(null); // Biarkan initial state null
 
   // State untuk Tab
   const [activeTab, setActiveTab] = useState('active'); // 'active' atau 'history'
@@ -102,11 +100,18 @@ function App() {
     setIsLoading(true);
     let error;
 
+    const dataToSave = {
+        customer_name: formData.customer_name,
+        customer_phone: formData.customer_phone,
+        item_name: formData.item_name,
+        item_damage: formData.item_damage,
+    };
+
     if (formData.id) { // Mode Edit
-      const { error: updateError } = await supabase.from('services').update(formData).eq('id', formData.id);
+      const { error: updateError } = await supabase.from('services').update(dataToSave).eq('id', formData.id);
       error = updateError;
     } else { // Mode Tambah
-      const { error: insertError } = await supabase.from('services').insert([formData]);
+      const { error: insertError } = await supabase.from('services').insert([{...dataToSave, status: 'Masuk'}]);
       error = insertError;
     }
 
@@ -120,8 +125,8 @@ function App() {
   };
 
   const handleAddNew = () => {
-    setEditingService({}); // Kosongkan data edit
-    setFormOpen(true);    // Buka modal
+    setEditingService(null); // Atur ke null untuk mode Tambah
+    setFormOpen(true);       // Buka modal
   };
 
   const handleEdit = (service) => {
