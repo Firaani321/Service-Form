@@ -1,11 +1,10 @@
 // File: src/components/WhatsAppPage.jsx
 
-import React, 'useState', useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { Link } from 'react-router-dom';
 
-// --- SERVER URL SEKARANG DIAMBIL DARI .ENV ---
-// Pastikan nama variabel diawali dengan REACT_APP_
+// SERVER URL SEKARANG DIAMBIL DARI .ENV
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 function WhatsAppPage() {
@@ -29,7 +28,6 @@ function WhatsAppPage() {
       setStatusMessage('Server terhubung. Menunggu QR Code...');
     });
 
-    // Terima QR code dari server
     socket.on('qr', (url) => {
       console.log('QR Code diterima');
       setQrCodeUrl(url);
@@ -37,15 +35,13 @@ function WhatsAppPage() {
       setIsConnected(false);
     });
 
-    // Jika sudah siap (sudah login sebelumnya atau baru saja scan)
     socket.on('ready', (message) => {
       console.log('WhatsApp siap:', message);
-      setQrCodeUrl(''); // Sembunyikan QR code
+      setQrCodeUrl(''); 
       setStatusMessage('WhatsApp siap digunakan!');
       setIsConnected(true);
     });
     
-    // Terima pesan status lainnya dari server
     socket.on('message', (message) => {
       console.log('Pesan dari server:', message);
       setStatusMessage(message);
@@ -57,11 +53,10 @@ function WhatsAppPage() {
       setIsConnected(false);
     });
 
-    // Bersihkan koneksi saat komponen ditutup
     return () => {
       socket.disconnect();
     };
-  }, []); // useEffect akan berjalan sekali saat komponen dimuat
+  }, []); 
 
   return (
     <div className="container mx-auto p-8 text-center">
