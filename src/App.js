@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { supabase } from './supabaseClient'; // Pastikan path ini benar
-import './App.css'; // Pastikan path ini benar
+import { supabase } from './supabaseClient';
+import './App.css';
 import { Search, Filter, Plus, Edit, Trash2, Eye, DollarSign, XCircle, LogOut } from 'lucide-react';
+import './index.css';
 
 // --- Bagian Konfigurasi & Komponen ---
 
