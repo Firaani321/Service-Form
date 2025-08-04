@@ -2,27 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import './App.css';
 
-// --- Bagian Konfigurasi & Komponen Login ---
-
-// Ganti sandi rahasia Anda di sini
-const SHARED_PASSWORD = 'SandiRahasiaTokoAnda123';
-
-// Komponen untuk halaman login
 function LoginPage({ onLoginSuccess }) {
+  // Ambil sandi rahasia dari environment variables
+  const SHARED_PASSWORD = process.env.REACT_APP_SHARED_PASSWORD;
+
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Beri peringatan jika sandi di environment variable belum di-set
+    if (!SHARED_PASSWORD) {
+      setError('Aplikasi belum dikonfigurasi dengan benar. Hubungi admin.');
+      return;
+    }
+    
     if (password === SHARED_PASSWORD) {
       setError('');
-      onLoginSuccess(); // Panggil fungsi ini jika sandi benar
+      onLoginSuccess();
     } else {
       setError('Sandi yang Anda masukkan salah!');
     }
   };
 
-  // Gaya CSS sederhana bisa ditaruh di sini agar komponen mandiri
   const styles = {
     container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f7f9' },
     loginBox: { padding: '40px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', textAlign: 'center', width: '350px' },
