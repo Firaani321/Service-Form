@@ -1,11 +1,12 @@
 // File: src/components/WhatsAppPage.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, 'useState', useEffect } from 'react';
 import io from 'socket.io-client';
-import { Link } from 'react-router-dom'; // Kita akan gunakan ini nanti
+import { Link } from 'react-router-dom';
 
-// --- MASUKKAN URL SERVER REPLIT ANDA DI SINI ---
-const SERVER_URL = 'https://05b5ddcb-5d65-4f28-8a73-d49c09fcfece-00-m46w3j131l0t.riker.replit.dev/';
+// --- SERVER URL SEKARANG DIAMBIL DARI .ENV ---
+// Pastikan nama variabel diawali dengan REACT_APP_
+const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 function WhatsAppPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -13,6 +14,13 @@ function WhatsAppPage() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Memberi peringatan jika URL server belum diatur
+    if (!SERVER_URL) {
+      setStatusMessage('Kesalahan: URL Server belum diatur di environment variables.');
+      console.error('REACT_APP_SERVER_URL tidak ditemukan di .env');
+      return;
+    }
+
     // Hubungkan ke server Replit Anda
     const socket = io(SERVER_URL);
 
@@ -36,7 +44,7 @@ function WhatsAppPage() {
       setStatusMessage('WhatsApp siap digunakan!');
       setIsConnected(true);
     });
-
+    
     // Terima pesan status lainnya dari server
     socket.on('message', (message) => {
       console.log('Pesan dari server:', message);
@@ -53,13 +61,13 @@ function WhatsAppPage() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, []); // useEffect akan berjalan sekali saat komponen dimuat
 
   return (
     <div className="container mx-auto p-8 text-center">
       <h1 className="text-3xl font-bold mb-4">Hubungkan WhatsApp</h1>
       <p className="text-gray-600 mb-8">Pindai QR code di bawah ini menggunakan menu "Perangkat Tertaut" di aplikasi WhatsApp Anda.</p>
-
+      
       <div className="flex justify-center items-center h-80 bg-gray-100 rounded-lg shadow-inner">
         {qrCodeUrl ? (
           <img src={qrCodeUrl} alt="QR Code WhatsApp" className="w-64 h-64" />
@@ -69,7 +77,7 @@ function WhatsAppPage() {
           </div>
         )}
       </div>
-
+      
       <p className="mt-6 font-semibold text-lg">{statusMessage}</p>
 
       <Link to="/" className="inline-block mt-8 px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
