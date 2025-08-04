@@ -2,27 +2,28 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from './supabaseClient';
 import './index.css'; // Pastikan CSS diimpor
 
-// Impor komponen yang sudah dipisah
-import LoginPage from './components/LoginPage';
-import ServiceTable from './components/ServiceTable'; 
-// Impor ikon
-import { Plus, LogOut } from 'lucide-react';
+// --- Impor untuk Navigasi Halaman ---
+import { Routes, Route, Link } from 'react-router-dom';
 
-// Komponen Modal untuk Form
-function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) { // Hapus default value
+// --- Impor Komponen Halaman ---
+import LoginPage from './components/LoginPage';
+import ServiceTable from './components/ServiceTable';
+import WhatsAppPage from './components/WhatsAppPage'; // Halaman baru untuk WhatsApp
+
+// --- Impor Ikon ---
+import { Plus, LogOut, MessageSquare } from 'lucide-react'; // Tambahkan ikon WhatsApp
+
+// Komponen Modal untuk Form (Tidak ada perubahan)
+function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
   const [formData, setFormData] = useState({});
 
-  // useEffect untuk mengisi data saat mode edit
   useEffect(() => {
-    // --- INI BAGIAN YANG DIPERBAIKI ---
-    // Tambahkan pengecekan `initialData` sebelum mengakses .id
     if (initialData && initialData.id) {
       setFormData(initialData);
     } else {
-      // Set ke state kosong untuk mode "Tambah Baru"
       setFormData({ customer_name: '', customer_phone: '', item_name: '', item_damage: '' });
     }
-  }, [initialData, isOpen]); // Tambahkan isOpen sebagai dependency
+  }, [initialData, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,102 +56,26 @@ function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
   );
 }
 
-// --- Komponen Utama Aplikasi ---
-function App() {
+// --- Komponen Halaman Servis (Sebelumnya adalah App) ---
+function ServicePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // State untuk mengontrol modal form
   const [isFormOpen, setFormOpen] = useState(false);
-  const [editingService, setEditingService] = useState(null); // Biarkan initial state null
+  const [editingService, setEditingService] = useState(null);
+  const [activeTab, setActiveTab] = useState('active');
 
-  // State untuk Tab
-  const [activeTab, setActiveTab] = useState('active'); // 'active' atau 'history'
-
-  // Fungsi fetch, login, dan handler dasar
-  const fetchServices = useCallback(async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false });
-    if (error) console.error('Error fetching services:', error);
-    else setServices(data);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (loggedIn) setIsAuthenticated(true);
-  }, []);
-
-  useEffect(() => {
-    if (isAuthenticated) fetchServices();
-  }, [isAuthenticated, fetchServices]);
-  
-  const handleLoginSuccess = () => {
-    localStorage.setItem('isLoggedIn', 'true');
-    setIsAuthenticated(true);
-  };
-  
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    setIsAuthenticated(false);
-  };
-
-  const handleSave = async (formData) => {
-    setIsLoading(true);
-    let error;
-
-    const dataToSave = {
-        customer_name: formData.customer_name,
-        customer_phone: formData.customer_phone,
-        item_name: formData.item_name,
-        item_damage: formData.item_damage,
-    };
-
-    if (formData.id) { // Mode Edit
-      const { error: updateError } = await supabase.from('services').update(dataToSave).eq('id', formData.id);
-      error = updateError;
-    } else { // Mode Tambah
-      const { error: insertError } = await supabase.from('services').insert([{...dataToSave, status: 'Masuk'}]);
-      error = insertError;
-    }
-
-    if (error) {
-      alert('Gagal menyimpan data: ' + error.message);
-    } else {
-      setFormOpen(false); // Tutup modal setelah berhasil
-      fetchServices();
-    }
-    setIsLoading(false);
-  };
-
-  const handleAddNew = () => {
-    setEditingService(null); // Atur ke null untuk mode Tambah
-    setFormOpen(true);       // Buka modal
-  };
-
-  const handleEdit = (service) => {
-    setEditingService(service); // Isi data untuk diedit
-    setFormOpen(true);          // Buka modal
-  };
-  
-  const handleDelete = async (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-        setIsLoading(true);
-        const { error } = await supabase.from('services').delete().eq('id', id);
-        if (error) alert('Gagal menghapus: ' + error.message);
-        else fetchServices();
-        setIsLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (id, newStatus) => {
-    const { error } = await supabase.from('services').update({ status: newStatus }).eq('id', id);
-    if (error) alert('Gagal mengubah status: ' + error.message);
-    else fetchServices();
-  };
-  
-  // Logika untuk memisahkan data berdasarkan tab
+  // ... (Semua fungsi handler Anda: fetchServices, handleLoginSuccess, handleLogout, dll. tetap sama)
+  const fetchServices = useCallback(async () => { setIsLoading(true); const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false }); if (error) console.error('Error fetching services:', error); else setServices(data); setIsLoading(false); }, []);
+  useEffect(() => { const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; if (loggedIn) setIsAuthenticated(true); }, []);
+  useEffect(() => { if (isAuthenticated) fetchServices(); }, [isAuthenticated, fetchServices]);
+  const handleLoginSuccess = () => { localStorage.setItem('isLoggedIn', 'true'); setIsAuthenticated(true); };
+  const handleLogout = () => { localStorage.removeItem('isLoggedIn'); setIsAuthenticated(false); };
+  const handleSave = async (formData) => { setIsLoading(true); let error; const dataToSave = { customer_name: formData.customer_name, customer_phone: formData.customer_phone, item_name: formData.item_name, item_damage: formData.item_damage, }; if (formData.id) { const { error: updateError } = await supabase.from('services').update(dataToSave).eq('id', formData.id); error = updateError; } else { const { error: insertError } = await supabase.from('services').insert([{...dataToSave, status: 'Masuk'}]); error = insertError; } if (error) { alert('Gagal menyimpan data: ' + error.message); } else { setFormOpen(false); fetchServices(); } setIsLoading(false); };
+  const handleAddNew = () => { setEditingService(null); setFormOpen(true); };
+  const handleEdit = (service) => { setEditingService(service); setFormOpen(true); };
+  const handleDelete = async (id) => { if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) { setIsLoading(true); const { error } = await supabase.from('services').delete().eq('id', id); if (error) alert('Gagal menghapus: ' + error.message); else fetchServices(); setIsLoading(false); } };
+  const handleStatusChange = async (id, newStatus) => { const { error } = await supabase.from('services').update({ status: newStatus }).eq('id', id); if (error) alert('Gagal mengubah status: ' + error.message); else fetchServices(); };
   const activeServices = useMemo(() => services.filter(s => ['Masuk', 'Pengecekan', 'Dikerjakan'].includes(s.status)), [services]);
   const historyServices = useMemo(() => services.filter(s => ['Selesai', 'Diambil', 'Batal'].includes(s.status)), [services]);
   const servicesToShow = activeTab === 'active' ? activeServices : historyServices;
@@ -164,6 +89,10 @@ function App() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Manajemen Servis</h1>
         <div className="flex items-center gap-4">
+          {/* --- TOMBOL BARU UNTUK NAVIGASI --- */}
+          <Link to="/whatsapp" className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <MessageSquare size={18} /> Hubungkan WA
+          </Link>
           <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Plus size={18} /> Tambah Servis
           </button>
@@ -176,42 +105,32 @@ function App() {
       {/* Tombol Tab */}
       <div className="border-b border-gray-200 mb-4">
         <nav className="-mb-px flex gap-2" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`py-3 px-6 rounded-t-lg font-medium text-sm transition-colors ${activeTab === 'active' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-          >
+          <button onClick={() => setActiveTab('active')} className={`py-3 px-6 rounded-t-lg font-medium text-sm transition-colors ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
             Pekerjaan Aktif ({activeServices.length})
           </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`py-3 px-6 rounded-t-lg font-medium text-sm transition-colors ${activeTab === 'history' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-          >
+          <button onClick={() => setActiveTab('history')} className={`py-3 px-6 rounded-t-lg font-medium text-sm transition-colors ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
             Riwayat Servis ({historyServices.length})
           </button>
         </nav>
       </div>
 
-      {/* Modal Form akan dipanggil di sini */}
-      <ServiceFormModal
-        isOpen={isFormOpen}
-        onClose={() => setFormOpen(false)}
-        onSave={handleSave}
-        isLoading={isLoading}
-        initialData={editingService}
-      />
+      {/* Modal Form */}
+      <ServiceFormModal isOpen={isFormOpen} onClose={() => setFormOpen(false)} onSave={handleSave} isLoading={isLoading} initialData={editingService} />
       
-      {/* Tabel akan menampilkan data sesuai tab yang aktif */}
-      <ServiceTable
-        services={servicesToShow}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onStatusChange={handleStatusChange}
-      />
+      {/* Tabel Data */}
+      <ServiceTable services={servicesToShow} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
     </div>
+  );
+}
+
+
+// --- Komponen App Baru (Sebagai Router Utama) ---
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<ServicePage />} />
+      <Route path="/whatsapp" element={<WhatsAppPage />} />
+    </Routes>
   );
 }
 
