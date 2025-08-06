@@ -15,25 +15,22 @@ import { Plus, LogOut, MessageSquare } from 'lucide-react'; // Tambahkan ikon Wh
 
 // Komponen Modal untuk Form (Tidak ada perubahan)
 function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ high_priority: false });
 
   useEffect(() => {
     if (initialData && initialData.id) {
       setFormData(initialData);
     } else {
-      setFormData({ customer_name: '', customer_phone: '', item_name: '', item_damage: '' });
+      setFormData({ customer_name: '', customer_phone: '', item_name: '', item_damage: '', high_priority: false });
     }
   }, [initialData, isOpen]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-  };
+  const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
 
   if (!isOpen) return null;
 
@@ -46,6 +43,12 @@ function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
           <input name="customer_phone" value={formData.customer_phone || ''} onChange={handleChange} placeholder="No. Telepon" className="p-2 border rounded" />
           <input name="item_name" value={formData.item_name || ''} onChange={handleChange} placeholder="Nama Barang" className="p-2 border rounded md:col-span-2" required />
           <textarea name="item_damage" value={formData.item_damage || ''} onChange={handleChange} placeholder="Deskripsi Kerusakan" className="p-2 border rounded md:col-span-2" rows="3"></textarea>
+          
+          {/* --- CHECKBOX BARU UNTUK HIGH PRIORITY --- */}
+          <div className="md:col-span-2 flex items-center gap-2">
+            <input type="checkbox" id="high_priority" name="high_priority" checked={!!formData.high_priority} onChange={handleChange} className="h-4 w-4" />
+            <label htmlFor="high_priority" className="font-medium text-red-600">Jadikan Prioritas Tinggi (High Priority)</label>
+          </div>
         </div>
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Batal</button>
@@ -65,13 +68,39 @@ function ServicePage() {
   const [editingService, setEditingService] = useState(null);
   const [activeTab, setActiveTab] = useState('active');
 
-  // ... (Semua fungsi handler Anda: fetchServices, handleLoginSuccess, handleLogout, dll. tetap sama)
   const fetchServices = useCallback(async () => { setIsLoading(true); const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false }); if (error) console.error('Error fetching services:', error); else setServices(data); setIsLoading(false); }, []);
   useEffect(() => { const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; if (loggedIn) setIsAuthenticated(true); }, []);
   useEffect(() => { if (isAuthenticated) fetchServices(); }, [isAuthenticated, fetchServices]);
   const handleLoginSuccess = () => { localStorage.setItem('isLoggedIn', 'true'); setIsAuthenticated(true); };
   const handleLogout = () => { localStorage.removeItem('isLoggedIn'); setIsAuthenticated(false); };
-  const handleSave = async (formData) => { setIsLoading(true); let error; const dataToSave = { customer_name: formData.customer_name, customer_phone: formData.customer_phone, item_name: formData.item_name, item_damage: formData.item_damage, }; if (formData.id) { const { error: updateError } = await supabase.from('services').update(dataToSave).eq('id', formData.id); error = updateError; } else { const { error: insertError } = await supabase.from('services').insert([{...dataToSave, status: 'Masuk'}]); error = insertError; } if (error) { alert('Gagal menyimpan data: ' + error.message); } else { setFormOpen(false); fetchServices(); } setIsLoading(false); };
+
+  // --- FUNGSI HANDLE SAVE DIPERBARUI ---
+  const handleSave = async (formData) => {
+    setIsLoading(true);
+    let error;
+    
+    // Pastikan semua data yang relevan disertakan
+    const dataToSave = {
+      customer_name: formData.customer_name,
+      customer_phone: formData.customer_phone,
+      item_name: formData.item_name,
+      item_damage: formData.item_damage,
+      high_priority: formData.high_priority || false, // Sertakan status prioritas
+    };
+
+    if (formData.id) {
+      const { error: updateError } = await supabase.from('services').update(dataToSave).eq('id', formData.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase.from('services').insert([{...dataToSave, status: 'Masuk'}]);
+      error = insertError;
+    }
+
+    if (error) { alert('Gagal menyimpan data: ' + error.message); } 
+    else { setFormOpen(false); fetchServices(); }
+    setIsLoading(false);
+  };
+
   const handleAddNew = () => { setEditingService(null); setFormOpen(true); };
   const handleEdit = (service) => { setEditingService(service); setFormOpen(true); };
   const handleDelete = async (id) => { if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) { setIsLoading(true); const { error } = await supabase.from('services').delete().eq('id', id); if (error) alert('Gagal menghapus: ' + error.message); else fetchServices(); setIsLoading(false); } };
