@@ -109,18 +109,14 @@ function ServicePage() {
   const handleStatusChange = async (id, newStatus) => { const { error } = await supabase.from('services').update({ status: newStatus }).eq('id', id); if (error) alert('Gagal mengubah status: ' + error.message); else fetchServices(); };
   const filteredServices = useMemo(() => {
     return services.filter(service => {
-      // 1. Filter berdasarkan status
       const matchesStatus = statusFilter === 'all' || service.status === statusFilter;
-      
-      // 2. Filter berdasarkan pencarian
       const lowerCaseQuery = searchQuery.toLowerCase();
       const matchesSearch = 
-        searchQuery === '' || // Tampilkan semua jika search bar kosong
+        searchQuery === '' ||
         service.id.toString().includes(lowerCaseQuery) ||
         service.customer_name?.toLowerCase().includes(lowerCaseQuery) ||
         service.item_name?.toLowerCase().includes(lowerCaseQuery) ||
         service.item_damage?.toLowerCase().includes(lowerCaseQuery);
-
       return matchesStatus && matchesSearch;
     });
   }, [services, searchQuery, statusFilter]);
@@ -134,27 +130,16 @@ function ServicePage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      
-      {/* Header: Di layar kecil (HP), tombol akan turun ke bawah judul */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Manajemen Servis</h1>
         <div className="flex items-center gap-2 md:gap-4">
-          <Link to="/whatsapp" className="flex items-center gap-2 px-3 py-2 md:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs md:text-sm">
-            <MessageSquare size={16} />
-            <span className="hidden sm:inline">Hubungkan WA</span>
-          </Link>
-          <button onClick={handleAddNew} className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs md:text-sm">
-            <Plus size={16} />
-            <span className="hidden sm:inline">Tambah Servis</span>
-          </button>
-          <button onClick={handleLogout} className="p-2 hover:bg-gray-200 rounded-full" title="Logout">
-            <LogOut size={20} />
-          </button>
+          <Link to="/whatsapp" className="flex items-center gap-2 px-3 py-2 md:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs md:text-sm"><MessageSquare size={16} /> <span className="hidden sm:inline">Hubungkan WA</span></Link>
+          <button onClick={handleAddNew} className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs md:text-sm"><Plus size={16} /> <span className="hidden sm:inline">Tambah Servis</span></button>
+          <button onClick={handleLogout} className="p-2 hover:bg-gray-200 rounded-full" title="Logout"><LogOut size={20} /></button>
         </div>
       </div>
-      
+
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        {/* Search Bar */}
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input 
@@ -165,7 +150,6 @@ function ServicePage() {
             className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {/* Filter Status */}
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <select
@@ -195,15 +179,12 @@ function ServicePage() {
         </nav>
       </div>
 
-      {/* Modal Form */}
       <ServiceFormModal isOpen={isFormOpen} onClose={() => setFormOpen(false)} onSave={handleSave} isLoading={isLoading} initialData={editingService} />
       
-      {/* Tabel Data */}
       <ServiceTable services={servicesToShow} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
     </div>
   );
 }
-
 
 // --- Komponen App Baru (Sebagai Router Utama) ---
 function App() {
