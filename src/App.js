@@ -70,9 +70,18 @@ function ServicePage() {
   const [activeTab, setActiveTab] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' sebagai default
+  const [isLoaded, setIsLoaded] = useState(false);
   
   const fetchServices = useCallback(async () => { setIsLoading(true); const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false }); if (error) console.error('Error fetching services:', error); else setServices(data); setIsLoading(false); }, []);
-  useEffect(() => { const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; if (loggedIn) setIsAuthenticated(true); }, []);
+  
+  useEffect(() => { 
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; 
+    if (loggedIn) setIsAuthenticated(true);
+    
+    // --- EFEK BARU UNTUK TRANSISI ---
+    // Atur isLoaded menjadi true setelah komponen dimuat untuk memicu animasi
+    setIsLoaded(true);
+  }, []);
   useEffect(() => { if (isAuthenticated) fetchServices(); }, [isAuthenticated, fetchServices]);
   const handleLoginSuccess = () => { localStorage.setItem('isLoggedIn', 'true'); setIsAuthenticated(true); };
   const handleLogout = () => { localStorage.removeItem('isLoggedIn'); setIsAuthenticated(false); };
@@ -133,8 +142,9 @@ function ServicePage() {
 
   return (
     // --- PENYESUAIAN RESPONSIF DITERAPKAN DI SINI ---
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      
+    // `opacity-0` membuat container tidak terlihat awalnya
+    <div className={`container mx-auto p-4 sm:p-6 lg:p-8 transition-opacity duration-700 ${isLoaded ? 'animate-slide-in-up' : 'opacity-0'}`}>
+    
       {/* Header: Di HP (flex-col), di tablet ke atas (md:flex-row) */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Manajemen Servis</h1>
