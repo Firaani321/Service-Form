@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from './supabaseClient';
 import './index.css'; // Pastikan CSS diimpor
-
+import { injectSpeedInsights } from '@vercel/speed-insights';
 // --- Impor untuk Navigasi Halaman ---
 import { Routes, Route, Link } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ import WhatsAppPage from './components/WhatsAppPage'; // Halaman baru untuk What
 
 // --- Impor Ikon ---
 import { Plus, LogOut, MessageSquare, Search, Filter } from 'lucide-react'; // Tambahkan ikon Search & Filter
+injectSpeedInsights();
 
 // Komponen Modal untuk Form (Tidak ada perubahan)
 function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
