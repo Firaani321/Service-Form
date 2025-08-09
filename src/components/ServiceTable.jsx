@@ -73,9 +73,12 @@ function ServiceTable({ services, onEdit, onDelete, onStatusChange }) {
           </tr>
         </thead>
         <tbody>
-          {services.map(service => (
-            // --- PENAMBAHAN WARNA HIGHLIGHT DI SINI ---
-            <tr key={service.id} className={`border-b ${getStatusHighlightStyle(service.status)}`}>
+         {services.map((service, index) => (
+            <tr 
+              key={service.id} 
+              className={`border-b ${getStatusHighlightStyle(service.status)} animate-slide-in-top`}
+              style={{ animationDelay: `${index * 70}ms` }} // Delay untuk efek staggered
+            >
               <td className="p-3 font-mono text-xs">{service.id}</td>
               <td className="p-3">{new Date(service.created_at).toLocaleDateString('id-ID')}</td>
               <td className="p-3">{service.customer_name}<br/><small className="text-gray-500">{service.customer_phone}</small></td>
@@ -84,9 +87,8 @@ function ServiceTable({ services, onEdit, onDelete, onStatusChange }) {
               <td className="p-3">
                 <select 
                   value={service.status}
-                  // Gunakan handler baru
                   onChange={(e) => handleStatusChange(service, e.target.value)} 
-                  data-id={service.id} // Tambahkan data-id untuk referensi
+                  data-id={service.id}
                   className="p-1 border rounded bg-white"
                 >
                   <option value="Masuk">Masuk</option>
