@@ -120,8 +120,10 @@ function ServicePage() {
       return matchesStatus && matchesSearch;
     });
   }, [services, searchQuery, statusFilter]);
-  const activeServices = useMemo(() => services.filter(s => ['Masuk', 'Pengecekan', 'Dikerjakan'].includes(s.status)), [services]);
-  const historyServices = useMemo(() => services.filter(s => ['Selesai', 'Diambil', 'Batal'].includes(s.status)), [services]);
+  const activeServices = useMemo(() => filteredServices.filter(s => ['Masuk', 'Pengecekan', 'Dikerjakan'].includes(s.status)), [filteredServices]);
+  const historyServices = useMemo(() => filteredServices.filter(s => ['Selesai', 'Diambil', 'Batal'].includes(s.status)), [filteredServices]);
+  
+  // Logika `servicesToShow` tetap sama, tapi sekarang sumber datanya sudah benar
   const servicesToShow = activeTab === 'active' ? activeServices : historyServices;
 
   if (!isAuthenticated) {
