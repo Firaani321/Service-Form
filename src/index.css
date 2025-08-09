@@ -21,6 +21,40 @@
   animation: slideInUp 0.7s ease-out forwards;
 }
 
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Definisikan animasi "slide dari atas" untuk baris tabel */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Class untuk menerapkan animasi */
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.5s ease-out forwards;
+}
+
+.animate-slide-in-top {
+  /* Atur agar animasi tidak terlihat sebelum dimulai */
+  opacity: 0; 
+  animation: slideInFromTop 0.5s ease-out forwards;
+}
+
 /* Gaya Tambahan untuk Form dan Tabel */
 body {
   background-color: #f4f7f9;
