@@ -11,7 +11,7 @@ import ServiceTable from './components/ServiceTable';
 import WhatsAppPage from './components/WhatsAppPage'; // Halaman baru untuk WhatsApp
 
 // --- Impor Ikon ---
-import { Plus, LogOut, MessageSquare } from 'lucide-react'; // Tambahkan ikon WhatsApp
+import { Plus, LogOut, MessageSquare, Search, Filter } from 'lucide-react'; // Tambahkan ikon Search & Filter
 
 // Komponen Modal untuk Form (Tidak ada perubahan)
 function ServiceFormModal({ isOpen, onClose, onSave, isLoading, initialData }) {
@@ -67,7 +67,9 @@ function ServicePage() {
   const [isFormOpen, setFormOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [activeTab, setActiveTab] = useState('active');
-
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' sebagai default
+  
   const fetchServices = useCallback(async () => { setIsLoading(true); const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false }); if (error) console.error('Error fetching services:', error); else setServices(data); setIsLoading(false); }, []);
   useEffect(() => { const loggedIn = localStorage.getItem('isLoggedIn') === 'true'; if (loggedIn) setIsAuthenticated(true); }, []);
   useEffect(() => { if (isAuthenticated) fetchServices(); }, [isAuthenticated, fetchServices]);
@@ -105,6 +107,23 @@ function ServicePage() {
   const handleEdit = (service) => { setEditingService(service); setFormOpen(true); };
   const handleDelete = async (id) => { if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) { setIsLoading(true); const { error } = await supabase.from('services').delete().eq('id', id); if (error) alert('Gagal menghapus: ' + error.message); else fetchServices(); setIsLoading(false); } };
   const handleStatusChange = async (id, newStatus) => { const { error } = await supabase.from('services').update({ status: newStatus }).eq('id', id); if (error) alert('Gagal mengubah status: ' + error.message); else fetchServices(); };
+  const filteredServices = useMemo(() => {
+    return services.filter(service => {
+      // 1. Filter berdasarkan status
+      const matchesStatus = statusFilter === 'all' || service.status === statusFilter;
+      
+      // 2. Filter berdasarkan pencarian
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      const matchesSearch = 
+        searchQuery === '' || // Tampilkan semua jika search bar kosong
+        service.id.toString().includes(lowerCaseQuery) ||
+        service.customer_name?.toLowerCase().includes(lowerCaseQuery) ||
+        service.item_name?.toLowerCase().includes(lowerCaseQuery) ||
+        service.item_damage?.toLowerCase().includes(lowerCaseQuery);
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [services, searchQuery, statusFilter]);
   const activeServices = useMemo(() => services.filter(s => ['Masuk', 'Pengecekan', 'Dikerjakan'].includes(s.status)), [services]);
   const historyServices = useMemo(() => services.filter(s => ['Selesai', 'Diambil', 'Batal'].includes(s.status)), [services]);
   const servicesToShow = activeTab === 'active' ? activeServices : historyServices;
@@ -134,19 +153,43 @@ function ServicePage() {
         </div>
       </div>
       
-      {/* Tombol Tab: Di HP, teksnya akan lebih kecil */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        {/* Search Bar */}
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input 
+            type="text" 
+            placeholder="Cari berdasarkan ID, nama, barang, atau kerusakan..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {/* Filter Status */}
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full sm:w-auto p-3 pl-10 border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Semua Status</option>
+            <option value="Masuk">Masuk</option>
+            <option value="Pengecekan">Pengecekan</option>
+            <option value="Dikerjakan">Dikerjakan</option>
+            <option value="Selesai">Selesai</option>
+            <option value="Diambil">Diambil</option>
+            <option value="Batal">Batal</option>
+          </select>
+        </div>
+      </div>
+      
       <div className="border-b border-gray-200 mb-4">
         <nav className="-mb-px flex gap-2" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`py-3 px-4 md:px-6 rounded-t-lg font-medium text-xs md:text-sm transition-colors ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-          >
+          <button onClick={() => setActiveTab('active')} className={`py-3 px-4 md:px-6 rounded-t-lg font-medium text-xs md:text-sm transition-colors ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
             Pekerjaan Aktif ({activeServices.length})
           </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`py-3 px-4 md:px-6 rounded-t-lg font-medium text-xs md:text-sm transition-colors ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-          >
+          <button onClick={() => setActiveTab('history')} className={`py-3 px-4 md:px-6 rounded-t-lg font-medium text-xs md:text-sm transition-colors ${activeTab === 'history' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
             Riwayat Servis ({historyServices.length})
           </button>
         </nav>
