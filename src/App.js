@@ -210,14 +210,11 @@ function ServicePage() {
 
       <ServiceFormModal isOpen={isFormOpen} onClose={() => setFormOpen(false)} onSave={handleSave} isLoading={isLoading} initialData={editingService} />
       
-      <div key={activeTab} className="animate-slide-in-left">
-        <ServiceTable 
-          services={servicesToShow} 
-          onEdit={handleEdit} 
-          onDelete={handleDelete} 
-          onStatusChange={handleStatusChange} 
-        />
+      <div key={activeTab + statusFilter + searchQuery} className="animate-slide-in-left">
+        <ServiceTable services={servicesToShow} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
       </div>
+
+    </div>
   );
 }
 
