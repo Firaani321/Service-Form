@@ -4,6 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Buat class untuk menerapkan animasi */
+.animate-slide-in-up {
+  animation: slideInUp 0.7s ease-out forwards;
+}
+
 /* Gaya Tambahan untuk Form dan Tabel */
 body {
   background-color: #f4f7f9;
