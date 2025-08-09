@@ -131,22 +131,37 @@ function ServicePage() {
   }
 
   return (
+    // --- PENYESUAIAN RESPONSIF DITERAPKAN DI SINI ---
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      
+      {/* Header: Di HP (flex-col), di tablet ke atas (md:flex-row) */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Manajemen Servis</h1>
+        
+        {/* Tombol-tombol di header dibuat lebih kecil di HP */}
         <div className="flex items-center gap-2 md:gap-4">
-          <Link to="/whatsapp" className="flex items-center gap-2 px-3 py-2 md:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs md:text-sm"><MessageSquare size={16} /> <span className="hidden sm:inline">Hubungkan WA</span></Link>
-          <button onClick={handleAddNew} className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs md:text-sm"><Plus size={16} /> <span className="hidden sm:inline">Tambah Servis</span></button>
-          <button onClick={handleLogout} className="p-2 hover:bg-gray-200 rounded-full" title="Logout"><LogOut size={20} /></button>
+          <Link to="/whatsapp" className="flex items-center gap-2 px-3 py-2 md:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs md:text-sm">
+            <MessageSquare size={16} />
+            {/* Teks hanya muncul di layar sm ke atas */}
+            <span className="hidden sm:inline">Hubungkan WA</span>
+          </Link>
+          <button onClick={handleAddNew} className="flex items-center gap-2 px-3 py-2 md:px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs md:text-sm">
+            <Plus size={16} />
+            <span className="hidden sm:inline">Tambah Servis</span>
+          </button>
+          <button onClick={handleLogout} className="p-2 hover:bg-gray-200 rounded-full" title="Logout">
+            <LogOut size={20} />
+          </button>
         </div>
       </div>
 
+      {/* Search & Filter: Di HP (flex-col), di tablet ke atas (sm:flex-row) */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input 
             type="text" 
-            placeholder="Cari berdasarkan ID, nama, barang, atau kerusakan..." 
+            placeholder="Cari ID, nama, barang..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full p-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -170,6 +185,7 @@ function ServicePage() {
         </div>
       </div>
       
+      {/* Tombol Tab: Ukuran padding dan teks disesuaikan untuk HP */}
       <div className="border-b border-gray-200 mb-4">
         <nav className="-mb-px flex gap-2" aria-label="Tabs">
           <button onClick={() => setActiveTab('active')} className={`py-3 px-4 md:px-6 rounded-t-lg font-medium text-xs md:text-sm transition-colors ${activeTab === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}>
