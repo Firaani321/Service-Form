@@ -3,17 +3,14 @@
     {
       "source": "/(.*)",
       "headers": [
-        // 1. Mencegah SSL Stripping / MITM (HSTS)
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
         },
-        // 2. Mencegah Clickjacking (X-Frame-Options)
         {
           "key": "X-Frame-Options",
           "value": "DENY"
         },
-        // 3. Mencegah Kebocoran melalui Caching (Cacheable HTTPS response)
         {
           "key": "Cache-Control",
           "value": "no-store, max-age=0, must-revalidate"
